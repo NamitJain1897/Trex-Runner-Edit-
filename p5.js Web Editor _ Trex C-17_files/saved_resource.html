@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.sound.min.js" crossorigin=""></script>
+<script src="https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/01535283-6c3e-4ee1-a785-f5969137625a.js" crossorigin=""></script>
+    
+    
+
+  <!--<base href="https://editor.p5js.org/whitehatjr/sketches/SwQvxw0ey/">--><base href="."><style>
+html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+</style><script src="https://editor.p5js.org/previewScripts.js"></script><style data-emotion=""></style><script>
+    function getScriptOff(line) {
+      var offs = [[72,"sketch"]];
+      var l = 0;
+      var file = '';
+      for (var i=0; i<offs.length; i++) {
+        var n = offs[i][0];
+        if (n < line && n > l) {
+          l = n;
+          file = offs[i][1];
+        }
+      }
+      return [line - l, file];
+    }
+    // catch reference errors, via http://stackoverflow.com/a/12747364/2994108
+    window.onerror = function (msg, url, lineNumber, columnNo, error) {
+        var string = msg.toLowerCase();
+        var substring = "script error";
+        var data = {};
+        if (url.match(/^(http:\/\/|https:\/\/)/) !== null && error.stack){
+          var errorNum = error.stack.split('about:srcdoc:')[1].split(':')[0];
+          var fileInfo = getScriptOff(errorNum);
+          data = msg + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        } else {
+          var fileInfo = getScriptOff(lineNumber);
+          data = msg + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        }
+        window.parent.postMessage([{
+          log: [{
+            method: 'error',
+            data: [data],
+            id: Date.now().toString()
+          }],
+          source: fileInfo[1]
+        }], '*');
+      return false;
+    };
+    // catch rejected promises
+    window.onunhandledrejection = function (event) {
+      if (event.reason && event.reason.message && event.reason.stack){
+        var errorNum = event.reason.stack.split('about:srcdoc:')[1].split(':')[0];
+        var fileInfo = getScriptOff(errorNum);
+        var data = event.reason.message + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        window.parent.postMessage([{
+          log: [{
+            method: 'error',
+            data: [data],
+            id: Date.now().toString()
+          }],
+          source: fileInfo[1]
+        }], '*');
+      }
+    };
+  </script></head>
+  <body>
+      <script data-tag="@fs-sketch.js">var PLAY = 1;
+var END = 0;
+var gameState = PLAY;
+
+var trex, trex_running, trex_collided;
+var ground, invisibleGround, groundImage;
+
+var cloudsGroup, cloudImage;
+var obstaclesGroup, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstacle6;
+
+var score=0;
+
+var gameOver, restart;
+
+
+function preload(){
+  trex_running =   loadAnimation("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/4541921e-e291-40d5-abf1-756c314fc755.png","https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/16f63446-924b-4606-bff1-039e82019f73.png","https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/cc17ad3e-f3a4-4b62-8e81-c8b5da82cae0.png");
+  trex_collided = loadAnimation("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/ba9c6da8-eb4f-43c0-b235-24d733b3459d.png");
+  
+  groundImage = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/cc6c7d56-2ef0-4e2e-8a68-1d39a7a638b3.png");
+  
+  cloudImage = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/cc086759-2369-4b8f-aca4-9611ecc0eb67.png");
+  
+  obstacle1 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/5b53c6a6-2d80-4d70-9d61-34699ccf8ba1.png");
+  obstacle2 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/d7e55d5f-6607-4788-a8c4-eeb73771dd3f.png");
+  obstacle3 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/0484f32a-c248-4392-b0d9-6976fd94c123.png");
+  obstacle4 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/25b33e6f-f5dc-43ef-9cbb-e4a40574a6c6.png");
+  obstacle5 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/3078e6bc-4e5d-4ef8-aadb-02d61b8dd78b.png");
+  obstacle6 = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/8eb3241d-2d1e-498a-904c-81b08b9e538c.png");
+  
+  gameOverImg = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/80506e28-538d-4853-ab51-20e5b094f83c.png");
+  restartImg = loadImage("https://assets.editor.p5js.org/5c5bc37c07d9ce001edcb109/193b0294-7c44-428c-80b8-4a60d398d5d4.png");
+}
+
+function setup() {
+  createCanvas(600, 200);
+  
+  trex = createSprite(50,180,20,50);
+  
+  trex.addAnimation("running", trex_running);
+  trex.addAnimation("collided", trex_collided);
+  trex.scale = 0.5;
+  
+  ground = createSprite(200,180,400,20);
+  ground.addImage("ground",groundImage);
+  ground.x = ground.width /2;
+  ground.velocityX = -(6 + 3*score/100);
+  
+  gameOver = createSprite(300,100);
+  gameOver.addImage(gameOverImg);
+  
+  restart = createSprite(300,140);
+  restart.addImage(restartImg);
+  
+  gameOver.scale = 0.5;
+  restart.scale = 0.5;
+
+  gameOver.visible = false;
+  restart.visible = false;
+  
+  invisibleGround = createSprite(200,190,400,10);
+  invisibleGround.visible = false;
+  
+  cloudsGroup = new Group();
+  obstaclesGroup = new Group();
+  
+  score = 0;
+}
+
+function draw() {
+  //trex.debug = true;
+  background(255);
+  text("Score: "+ score, 500,50);
+  
+  if (gameState===PLAY){
+    score = score + Math.round(getFrameRate()/60);
+    ground.velocityX = -(6 + 3*score/100);
+    //change the trex animation
+    trex.changeAnimation("running", trex_running);
+    
+    if(keyDown("space") && trex.y >= 159) {
+      trex.velocityY = -12;
+    }
+  
+    trex.velocityY = trex.velocityY + 0.8
+  
+    if (ground.x < 0){
+      ground.x = ground.width/2;
+    }
+  camera.position.y = trex.y;
+    
+    trex.collide(invisibleGround);
+    spawnClouds();
+    spawnObstacles();
+  
+    if(obstaclesGroup.isTouching(trex)){
+        gameState = END;
+    }
+  }
+  else if (gameState === END) {
+    gameOver.visible = true;
+    restart.visible = true;
+    
+    //set velcity of each game object to 0
+    ground.velocityX = 0;
+    trex.velocityY = 0;
+    obstaclesGroup.setVelocityXEach(0);
+    cloudsGroup.setVelocityXEach(0);
+    
+    //change the trex animation
+    trex.changeAnimation("collided",trex_collided);
+    
+    //set lifetime of the game objects so that they are never destroyed
+    obstaclesGroup.setLifetimeEach(-1);
+    cloudsGroup.setLifetimeEach(-1);
+    
+    if(mousePressedOver(restart)) {
+      reset();
+    }
+  }
+  
+  
+  drawSprites();
+}
+
+function spawnClouds() {
+  //write code here to spawn the clouds
+  if (frameCount % 60 === 0) {
+    var cloud = createSprite(600,120,40,10);
+    cloud.y = Math.round(random(80,120));
+    cloud.addImage(cloudImage);
+    cloud.scale = 0.5;
+    cloud.velocityX = -3;
+    
+     //assign lifetime to the variable
+    cloud.lifetime = 200;
+    
+    //adjust the depth
+    cloud.depth = trex.depth;
+    trex.depth = trex.depth + 1;
+    
+    //add each cloud to the group
+    cloudsGroup.add(cloud);
+  }
+  
+}
+
+function reset(){
+  gameState = PLAY;
+  gameOver.visible = false;
+  restart.visible = false;
+  
+  obstaclesGroup.destroyEach();
+  cloudsGroup.destroyEach();
+  score = 0;
+}
+
+function spawnObstacles() {
+  if(frameCount % 60 === 0) {
+    var obstacle = createSprite(600,165,10,40);
+    //obstacle.debug = true;
+    obstacle.velocityX = -(6 + 3*score/100);
+    
+    //generate random obstacles
+    var rand = Math.round(random(1,6));
+    switch(rand) {
+      case 1: obstacle.addImage(obstacle1);
+              break;
+      case 2: obstacle.addImage(obstacle2);
+              break;
+      case 3: obstacle.addImage(obstacle3);
+              break;
+      case 4: obstacle.addImage(obstacle4);
+              break;
+      case 5: obstacle.addImage(obstacle5);
+              break;
+      case 6: obstacle.addImage(obstacle6);
+              break;
+      default: break;
+    }
+    
+    //assign scale and lifetime to the obstacle           
+    obstacle.scale = 0.5;
+    obstacle.lifetime = 300;
+    //add each obstacle to the group
+    obstaclesGroup.add(obstacle);
+  }
+}
+
+</script>
+  
+
+<canvas id="defaultCanvas0" class="p5Canvas" width="1200" height="400" style="width: 600px; height: 200px;"></canvas></body></html>
